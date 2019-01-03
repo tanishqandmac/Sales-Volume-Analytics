@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sales Volume Report</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
+  <script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.datatables.net/1.10.19/js/dataTables.bootstrap4.min.js"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+  <style>
+  .card{
+    padding-bottom: 10px
+  }
+  .container {
+    display: flex;
+  }
+</style>
+</head>
+<body>
+  <div class="jumbotron">
+    <h1 class="text-dark text-center"><strong style="font-weight:900">Sales </strong> <strong style="font-weight:100; color:deepskyblue;">Report</strong></h1>
+    <img src="{% static 'core/img/richily1.png' %}" class="float-right" width="150px">
+  </div>
+  <div class = "container-fluid">
+    <h2><span>{{Summary}}</span><strong> Report</strong> </h2><hr>
+    <nav class="navbar navbar-expand-sm bg-light navbar-light justify-content-center">
+      <ul class="navbar-nav text-center container">
+        <li class="nav-item">
+          <a href="/index"  class="nav-link">All</a>
+        </li>
+        <li class="nav-item">
+          <a href="/index/?query=today" class="nav-link">Today</a>
+        </li>
+        <li class="nav-item">
+          <a href="/index/?query=week" class="nav-link">This Week</a>
+        </li>
+        <li class="nav-item">
+          <a href="/index/?query=month" class="nav-link">This Month</a>
+        </li>
+        <li class="nav-item">
+          <a href="/index/?query=lastmonth" class="nav-link">Last Month</a>
+        </li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="navbardrop" data-toggle="dropdown">
+            Quarterly
+          </a>
+          <div class="dropdown-menu">
+            <a class="dropdown-item" href="/index/?query=1stquarter">1st Quarter</a>
+            <a class="dropdown-item" href="/index/?query=2ndquarter">2nd Quarter</a>
+            <a class="dropdown-item" href="/index/?query=3rdquarter">3rd Quarter</a>
+            <a class="dropdown-item" href="/index/?query=4thquarter">4th Quarter</a>
+          </div>
+        </li>
+
+        <li>
+          <div class="btn-group justify-content-end" style="margin:5px; right:0;">
+            <input id="lol" type="text" name="datefilter" value="" placeholder="Custom Range"/>
+            <button class="btn btn-info"id="myButton" onclick="customDate()">Go</button>
+          </div>
+        </li>
+      </ul>
+    </nav>
+    <hr>
+
+    <table id="example" class="table table-striped table-bordered rounded shadow-lg" style="width:100%">
+      <thead class="bg-info text-white">
+        <tr>
+          <th>SKU</th>
+          <th>Name</th>
+          <th>Variant</th>
+          <th>Quantity</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for Product in Products %}
+        <tr>
+          <td>{{Product.SKU}}</td>
+          <td>{{Product.Name}}</td>
+          <td>{{Product.Variant}}</td>
+          <td>{{Product.Quantity}}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <br><hr>
+    <div class="row">
+      <div class="col-sm-6">
+        <div class="card shadow-lg">
+          <div class="card-body">
+            <h5 class="card-title"><strong>Customer</strong> Support</h5><hr class="bg-secondary">
+            <p class="card-text">Facing any issue with Sales Analytics? Feel free to contact us and We will make sure it gets fixed ASAP.<br> <strong class = "text-center">Email - <a href="mailto:tanishqandmac@gmail.com" target="_top">tanishqandmac@gmail.com</a></strong></p>
+          </div>
+        </div>
+      </div>
+      <br>
+      <div class="col-sm-6">
+        <div class="card shadow-lg">
+          <div class="card-body">
+            <h5 class="card-title"><strong>Feature/App</strong> Request</h5><hr class="bg-secondary">
+            <p class="card-text">We listen to all your feedbacks/suggestions very sincerelly. If you have any App/feature request, Let us know!<br><strong class = "text-center">Email - <a href="mailto:featurerequest@gmail.com" target="_top">featurerequest@gmail.com</a></strong></p>
+
+          </div>
+        </div>
+      </div>
+    </div>
+    <br>
+  </div>
+  <footer class="page-footer font-small bg-dark text-white">
+    <div class="footer text-center"><img src="{% static 'core/img/footer.png' %}" width="250px" >
+    </div>
+  </footer>
+</body>
+<script type="text/javascript">
+$(document).ready(function() {
+  $('#example').DataTable();
+
+} );
+</script>
+<script type="text/javascript">
+$(function() {
+  $('input[name="datefilter"]').daterangepicker({
+    autoUpdateInput: false,
+    locale: {
+      cancelLabel: 'Clear'
+    }
+  });
+  $('input[name="datefilter"]').on('apply.daterangepicker', function(ev, picker) {
+    $(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
+  });
+  $('input[name="datefilter"]').on('cancel.daterangepicker', function(ev, picker) {
+    $(this).val('');
+  });
+});
+function customDate() {
+  var pesos = document.getElementById("lol");
+  var dates = pesos.value.replace(" - ","-");
+  var query = "/?query=";
+  var final = query.concat(dates);
+  console.log(final);
+  var url  = '/index';
+  var final1 = url.concat(final);
+  window.location.href = final1;
+}
+</script>
+</html>
