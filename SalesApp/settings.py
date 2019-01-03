@@ -25,7 +25,7 @@ SECRET_KEY = 'z7j26q9$8i69mu8b)nxu=_57a)urglib_6a47yn_+vma-=3fpl'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['cfff8fe3.ngrok.io']
+ALLOWED_HOSTS = ['shrouded-hamlet-40239.herokuapp.com']
 
 
 # Application definition

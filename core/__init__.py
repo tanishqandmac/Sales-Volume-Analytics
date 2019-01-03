@@ -1,4 +1,4 @@
-CALLBACKURL = "https://cfff8fe3.ngrok.io/webhooks"
+CALLBACKURL = "https://shrouded-hamlet-40239.herokuapp.com/webhooks"
 GRAPHQL_URL_QUERY = 'https://{}/admin/api/graphql.json'
 GRAPHQL_HEADERS_QUERY = '''{{
                 'Content-Type': 'application/graphql',
@@ -12,7 +12,7 @@ HEADERS_QUERY = '''{{
 
 GRAPHQL_WEBHOOK_CHECK_QUERY = '''
 {
-  webhookSubscriptions(first:1, callbackUrl:"https://cfff8fe3.ngrok.io/webhooks"){
+  webhookSubscriptions(first:1, callbackUrl:"https://shrouded-hamlet-40239.herokuapp.com/webhooks"){
     edges{
       node{
         id
@@ -58,7 +58,7 @@ JSON_WEBHOOK_DESTROY_QUERY = {
                 ''',
                   "variables": {
                     "topic": "APP_UNINSTALLED",
-                    "webhookSubscription": {"callbackUrl": "https://cfff8fe3.ngrok.io/uninstall"}
+                    "webhookSubscription": {"callbackUrl": "https://shrouded-hamlet-40239.herokuapp.com/uninstall"}
                   }
                 }
 
