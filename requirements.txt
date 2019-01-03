@@ -23,6 +23,7 @@ ndg-httpsclient==0.5.1
 patterns==0.3
 pdfkit==0.6.1
 promise==2.2.1
+psycopg2==2.7.6.1
 pyactiveresource==2.1.2
 pyasn1==0.4.5
 pycparser==2.19
