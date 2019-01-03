@@ -4,7 +4,6 @@ from shopify_auth.decorators import login_required
 from .models import UserDatabase,ProductsDatabase
 from shopify_webhook.decorators import webhook
 from shopify_auth.models import AbstractShopUser
-from graphqlclient import GraphQLClient
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.db.models import Sum
