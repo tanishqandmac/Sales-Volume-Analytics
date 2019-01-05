@@ -7,6 +7,7 @@ app_name = 'core'
 urlpatterns = [
     url('index', views.index ,name = 'index'),
     url('index/(?P<query>\s+)/$', views.index),
+    url('syncpage', views.sync, name = 'syncpage'),
     url('sync', views.sync),
     url('webhooks', views.orders_create ,name = 'webhook'),
     url('uninstall', views.app_uninstalled ,name = 'uninstall'),

@@ -6,4 +6,5 @@ from django.conf import settings
 urlpatterns = [
     url('login/', include('shopify_auth.urls')),
     url('', include('core.urls')),
+    url('django-rq/', include('django_rq.urls')),
 ]

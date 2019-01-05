@@ -6,12 +6,14 @@ from shopify_webhook.decorators import webhook
 from shopify_auth.models import AbstractShopUser
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
+from rq import Connection, Queue
 from django.db.models import Sum
 from django.contrib import auth
 from operator import itemgetter
 from collections import Counter
 from datetime import datetime
 from .dateCal import datePicker,summaryPicker
+from django_rq import job
 import traceback
 import requests
 import shopify
@@ -24,6 +26,7 @@ def orders_create(request):
     try:
         userObject = UserDatabase.objects.get(domainName = str((request.webhook_domain)).split(".")[0])
         data = request.webhook_data
+        print (data['line_items'])
         for a in data['line_items']:
             if (a['sku']==""):
                 sku = 0
@@ -42,10 +45,13 @@ def app_uninstalled(request):
         data = request.webhook_data
         UserDatabase.objects.filter(domainName = str(data['domain']).split(".")[0]).delete()
         return HttpResponse('200')
-        del request.user.session
     except Exception:
         print(traceback.format_exc())
         return HttpResponse('404')
+
+@login_required
+def syncpage(request, *args, **kwargs):
+    return render(request,"core/sync.html",{})
 
 @login_required
 def index(request, *args, **kwargs):
@@ -80,95 +86,118 @@ def index(request, *args, **kwargs):
 def sync(request, *args, **kwargs):
     with request.user.session:
         try:
-            #Local Variables Decl.
-            queryData = ""
-            Products = []
-            customProducts = []
             domain_name = request.user
             user_token = request.user.token
-
-            #Headers
-            graphql_headers = {
-            'Content-Type': 'application/graphql',
-                'X-Shopify-Access-Token': user_token,
-                }
-            headers = {
-                'Content-Type': 'application/json',
-                'X-Shopify-Access-Token': user_token ,
-                }
-
-            #Recreating User Object
-            userObject = UserDatabase.objects.filter(domainName = str((request.user)).split(".")[0]).delete()
-            userObject = UserDatabase(domainName = str((request.user)).split(".")[0],lastModified = datetime.now())
-            userObject.save()
-
-            #Graphql Query for Checking Webhook Existence
-            r = requests.post(GRAPHQL_URL_QUERY.format(domain_name),
-            headers = graphql_headers,data = GRAPHQL_WEBHOOK_CHECK_QUERY)
-            response = r.json()
-            if not response['data']['webhookSubscriptions']['edges']:
-                response1 = requests.post(GRAPHQL_URL_QUERY.format(domain_name),
-                                        headers = headers,
-                                        json = JSON_WEBHOOK_CREATE_QUERY)
-                response2 = requests.post(GRAPHQL_URL_QUERY.format(domain_name),
-                                        headers = headers,
-                                        json = JSON_WEBHOOK_DESTROY_QUERY)
-
-            #Fetching Orders and Storing them via Graphql
-            response = requests.post(GRAPHQL_URL_QUERY.format(domain_name),
-                                    headers=graphql_headers,
-                                    data=GRAPHQL_ORDER_FETCH_QUERY.format(""))
-
-            responseJSON = response.json()
-            GrossSales = GrossSalesCal(userObject,responseJSON,customProducts)
-            k = 2
-            while(GrossSales[0]!=0):
-                if(GrossSales[0] == 1):
-                    dataH = GRAPHQL_ORDER_FETCH_QUERY.format(", after:" + "\"" + GrossSales[1] + "\"")
-                    response = requests.post(GRAPHQL_URL_QUERY.format(domain_name),
-                                            headers = graphql_headers,
-                                            data = dataH)
-                    responseJSON = response.json()
-                    myList = GrossSales[2]
-                    GrossSales = GrossSalesCal(userObject,responseJSON,GrossSales[2])
-                    k = 2
-                    time.sleep(1)
-                    print ("1 - " + str(k))
-                elif(GrossSales[0] == -1):
-                    time.sleep(2**k)
-                    response = requests.post(GRAPHQL_URL_QUERY.format(domain_name),
-                                            headers = graphql_headers,
-                                            data = dataH)
-                    responseJSON = response.json()
-                    GrossSales = GrossSalesCal(userObject,responseJSON,myList)
-                    k += 1
-                    print ("-1 - " + str(k))
-
-            print ("Done")
-            for items in GrossSales[2]:
-                print (items)
-                response = requests.post(GRAPHQL_URL_QUERY.format(domain_name),
-                                        headers = graphql_headers,
-                                        data = GRAPHQL_EXTRA_ORDERS_FETCH_ORDERS.format(items))
-                responseJSON = response.json()
-                print (responseJSON)
-                response = GrossSalesExtraCal(userObject,responseJSON)
-                print (response)
-                while (response == -1):
-                    time.sleep(5)
-                    response = requests.post(GRAPHQL_URL_QUERY.format(domain_name),
-                                            headers = graphql_headers,
-                                            data = GRAPHQL_EXTRA_ORDERS_FETCH_ORDERS.format(items))
-                    responseJSON = response.json()
-                    response = GrossSalesExtraCal(userObject,responseJSON)
-
-            productsList = ProductsDatabase.objects.filter(sno = userObject)
-            pList = ProductsDictMaker(userObject,productsList)
-
+            synchronisation.delay(domain_name,user_token)
+            webhookCreation.delay(domain_name,user_token)
+            '''
+            if returnValue:
+                return redirect('core:index')
+            else:
+                return render(request,"core/lol.html",{})
+            '''
         except Exception:
             print(traceback.format_exc())
             return render(request,"core/error.html",{})
+    time.sleep(3)
     return redirect('core:index')
+
+@job
+def webhookCreation(domain_name,user_token):
+    response1 = None
+    response2 = None
+    graphql_headers = {
+    'Content-Type': 'application/graphql',
+        'X-Shopify-Access-Token': user_token,
+        }
+    headers = {
+        'Content-Type': 'application/json',
+        'X-Shopify-Access-Token': user_token ,
+        }
+
+    #Graphql Query for Checking Webhook Existence
+    r = requests.post(GRAPHQL_URL_QUERY.format(domain_name),
+    headers = graphql_headers,data = GRAPHQL_WEBHOOK_CHECK_QUERY)
+    response = r.json()
+    if not response['data']['webhookSubscriptions']['edges']:
+        response1 = requests.post(GRAPHQL_URL_QUERY.format(domain_name),
+                                headers = headers,
+                                json = JSON_WEBHOOK_CREATE_QUERY)
+        response2 = requests.post(GRAPHQL_URL_QUERY.format(domain_name),
+                                headers = headers,
+                                json = JSON_WEBHOOK_DESTROY_QUERY)
+
+@job
+def synchronisation(domain_name,user_token):
+    #Local Variables Decl.
+    queryData = ""
+    Products = []
+    customProducts = []
+    #Headers
+    graphql_headers = {
+    'Content-Type': 'application/graphql',
+        'X-Shopify-Access-Token': user_token,
+        }
+    headers = {
+        'Content-Type': 'application/json',
+        'X-Shopify-Access-Token': user_token ,
+        }
+
+    #Recreating User Object
+    userObject = UserDatabase.objects.filter(domainName = str(domain_name).split(".")[0]).delete()
+    userObject = UserDatabase(domainName = str(domain_name).split(".")[0],lastModified = datetime.now())
+    userObject.save()
+
+    #Fetching Orders and Storing them via Graphql
+    response = requests.post(GRAPHQL_URL_QUERY.format(domain_name),
+                            headers=graphql_headers,
+                            data=GRAPHQL_ORDER_FETCH_QUERY.format(""))
+
+    responseJSON = response.json()
+    GrossSales = GrossSalesCal(userObject,responseJSON,customProducts)
+    k = 2
+    while(GrossSales[0]!=0):
+        if(GrossSales[0] == 1):
+            dataH = GRAPHQL_ORDER_FETCH_QUERY.format(", after:" + "\"" + GrossSales[1] + "\"")
+            response = requests.post(GRAPHQL_URL_QUERY.format(domain_name),
+                                    headers = graphql_headers,
+                                    data = dataH)
+            responseJSON = response.json()
+            myList = GrossSales[2]
+            GrossSales = GrossSalesCal(userObject,
+                                       responseJSON,
+                                       GrossSales[2])
+                ##GrossSales = GrossSalesCal(userObject,responseJSON,GrossSales[2])
+            k = 2
+            time.sleep(1)
+            print ("1 - " + str(k))
+        elif(GrossSales[0] == -1):
+            time.sleep(2**k)
+            response = requests.post(GRAPHQL_URL_QUERY.format(domain_name),
+                                    headers = graphql_headers,
+                                    data = dataH)
+            responseJSON = response.json()
+            GrossSales = GrossSalesCal(userObject,responseJSON,myList)
+            k += 1
+            print ("-1 - " + str(k))
+
+    print ("Done")
+    for items in GrossSales[2]:
+        print (items)
+        response = requests.post(GRAPHQL_URL_QUERY.format(domain_name),
+                                headers = graphql_headers,
+                                data = GRAPHQL_EXTRA_ORDERS_FETCH_ORDERS.format(items))
+        responseJSON = response.json()
+        print (responseJSON)
+        response = GrossSalesExtraCal(userObject,responseJSON)
+        print (response)
+        while (response == -1):
+            time.sleep(5)
+            response = requests.post(GRAPHQL_URL_QUERY.format(domain_name),
+                                    headers = graphql_headers,
+                                    data = GRAPHQL_EXTRA_ORDERS_FETCH_ORDERS.format(items))
+            responseJSON = response.json()
+            response = GrossSalesExtraCal(userObject,responseJSON)
 
 def GrossSalesCal(userObject,response,customProductsList):
     try:
@@ -237,6 +266,9 @@ def ProductsDictMaker(userObject,productsList):
             name = a[1]
             variant = "-"
         #date = str(distinctProductsFilter[0].createdAt).split()[0]
-        plist.append({'SKU':a[0],'Name':name.title(),'Variant':variant,'Quantity':quantity['quantity__sum']})
+        if(a[0]!=0):
+            plist.append({'SKU':a[0],'Name':name.title(),'Variant':variant,'Quantity':quantity['quantity__sum']})
+        else:
+            plist.append({'SKU':' - ','Name':name.title(),'Variant':variant,'Quantity':quantity['quantity__sum']})
     #pListSorted = sorted(plist, key=itemgetter('Quantity'), reverse=True)
     return (plist)
