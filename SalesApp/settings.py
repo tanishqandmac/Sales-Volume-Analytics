@@ -162,11 +162,13 @@ EMAIL_HOST_PASSWORD = 'Tonystark123'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 
+'''
 RQ_QUEUES = {
     'default': {
         'HOST': 'localhost',
         'PORT': 6379,
         'DB': 0,
+        'URL': os.getenv('REDISTOGO_URL', 'redis://localhost:6379/0'), # If you're on Heroku
         #'PASSWORD': 'some-password',
         'DEFAULT_TIMEOUT': 360,
     },
@@ -192,4 +194,15 @@ RQ_QUEUES = {
         'PORT': 6379,
         'DB': 0,
     }
+}
+'''
+
+RQ_QUEUES = {
+    'default': {
+         'HOST': 'localhost',
+         'PORT': '6379',
+         'URL': os.getenv('REDISTOGO_URL', 'redis://localhost:6379'),  # If you're
+         'DB': 0,
+         'DEFAULT_TIMEOUT': 500,
+     }
 }
