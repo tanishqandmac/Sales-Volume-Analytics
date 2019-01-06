@@ -283,13 +283,16 @@ def activation(request, *args, **kwargs):
         response = requests.post(url.format(domain = request.user,
                                 charge = charge),
                                 headers = headers)
-        if(response.json()['recurring_application_charge']['status'] == "active"):
-            obj = UserDatabase.objects.get(domainName = str(request.user).split(".")[0])
-            obj.flag = 1
-            obj.save()
-            return redirect("core:index")
-        else:
-            return render(request, "core/error.html", {})
+        try:
+            if(response.json()['recurring_application_charge']['status'] == "active"):
+                obj = UserDatabase.objects.get(domainName = str(request.user).split(".")[0])
+                obj.flag = 1
+                obj.save()
+                return redirect("core:index")
+            else:
+                return render(request, "core/error.html", {})
+        except:
+            return render(request,"core/error.html",{})
 
 @login_required
 def billing(request, *args, **kwargs):
@@ -313,7 +316,10 @@ def billing(request, *args, **kwargs):
         response = requests.post(url.format(domain_name),
                                 headers = headers,
                                 json = json)
-        if(response.json()['recurring_application_charge']['status'] == "pending"):
-            return redirect(response.json()['recurring_application_charge']['confirmation_url'])
-        else:
-            return redirect("core:index")
+        try:
+            if(response.json()['recurring_application_charge']['status'] == "pending"):
+                return redirect(response.json()['recurring_application_charge']['confirmation_url'])
+            else:
+                return redirect("core:index")
+        except:
+            return render(request,"core/error.html",{})
