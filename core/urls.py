@@ -9,6 +9,8 @@ urlpatterns = [
     url('index/(?P<query>\s+)/$', views.index),
     url('syncpage', views.sync, name = 'syncpage'),
     url('sync', views.sync),
+    url('activation', views.activation ,name = 'activation'),
+    url('billing', views.billing ,name = 'billing'),
     url('webhooks', views.orders_create ,name = 'webhook'),
     url('uninstall', views.app_uninstalled ,name = 'uninstall'),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

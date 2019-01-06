@@ -58,26 +58,30 @@ def index(request, *args, **kwargs):
     with request.user.session:
         try:
             print (request.user)
-            userObject = UserDatabase.objects.get(domainName = str((request.user)).split(".")[0])
-            date = request.GET.get('query', '')
-            if(date==''):
-                productsList = ProductsDatabase.objects.filter(sno = userObject)
-                print (len(productsList))
-                if(len(productsList)==0):
-                    return render(request, "core/sync.html", {})
-            else:
-                dates = datePicker(date)
-                if (len(dates) == 1):
-                    print (dates)
-                    productsList = ProductsDatabase.objects.filter(sno = userObject,
-                                                                createdAt=dates[0])
+            obj,flag = UserDatabase.objects.get_or_create(domainName=str(request.user).split(".")[0])
+            if (obj.flag == 1):
+                userObject = UserDatabase.objects.get(domainName = str((request.user)).split(".")[0])
+                date = request.GET.get('query', '')
+                if(date==''):
+                    productsList = ProductsDatabase.objects.filter(sno = userObject)
                     print (len(productsList))
-                elif (len(dates) == 2):
-                    productsList = ProductsDatabase.objects.filter(sno = userObject,
-                                                                createdAt__range=(dates[0], dates[1]))
-            pList = ProductsDictMaker(userObject,productsList)
-            Summary = summaryPicker(date)
-            return render(request, "core/report.html", {'Products': pList, "Summary":Summary})
+                    if(len(productsList)==0):
+                        return render(request, "core/sync.html", {})
+                else:
+                    dates = datePicker(date)
+                    if (len(dates) == 1):
+                        print (dates)
+                        productsList = ProductsDatabase.objects.filter(sno = userObject,
+                                                                    createdAt=dates[0])
+                        print (len(productsList))
+                    elif (len(dates) == 2):
+                        productsList = ProductsDatabase.objects.filter(sno = userObject,
+                                                                    createdAt__range=(dates[0], dates[1]))
+                pList = ProductsDictMaker(userObject,productsList)
+                Summary = summaryPicker(date)
+                return render(request, "core/report.html", {'Products': pList, "Summary":Summary})
+            else:
+                return redirect("core:billing")
         except Exception:
             print(traceback.format_exc())
             return render(request, "core/sync.html", {})
@@ -90,12 +94,6 @@ def sync(request, *args, **kwargs):
             user_token = request.user.token
             synchronisation.delay(domain_name,user_token)
             webhookCreation.delay(domain_name,user_token)
-            '''
-            if returnValue:
-                return redirect('core:index')
-            else:
-                return render(request,"core/lol.html",{})
-            '''
         except Exception:
             print(traceback.format_exc())
             return render(request,"core/error.html",{})
@@ -145,7 +143,7 @@ def synchronisation(domain_name,user_token):
 
     #Recreating User Object
     userObject = UserDatabase.objects.filter(domainName = str(domain_name).split(".")[0]).delete()
-    userObject = UserDatabase(domainName = str(domain_name).split(".")[0],lastModified = datetime.now())
+    userObject = UserDatabase(domainName = str(domain_name).split(".")[0],flag = 1)
     userObject.save()
 
     #Fetching Orders and Storing them via Graphql
@@ -272,3 +270,50 @@ def ProductsDictMaker(userObject,productsList):
             plist.append({'SKU':' - ','Name':name.title(),'Variant':variant,'Quantity':quantity['quantity__sum']})
     #pListSorted = sorted(plist, key=itemgetter('Quantity'), reverse=True)
     return (plist)
+
+@login_required
+def activation(request, *args, **kwargs):
+    with request.user.session:
+        charge = request.GET.get('charge_id', '')
+        url = 'https://{domain}/admin/recurring_application_charges/{charge}/activate.json'
+        headers = {
+                    'Content-Type': 'application/json',
+                    'X-Shopify-Access-Token': request.user.token,
+                }
+        response = requests.post(url.format(domain = request.user,
+                                charge = charge),
+                                headers = headers)
+        if(response.json()['recurring_application_charge']['status'] == "active"):
+            obj = UserDatabase.objects.get(domainName = str(request.user).split(".")[0])
+            obj.flag = 1
+            obj.save()
+            return redirect("core:index")
+        else:
+            return render(request, "core/error.html", {})
+
+@login_required
+def billing(request, *args, **kwargs):
+    with request.user.session:
+        domain_name = request.user
+        access_token = request.user.token
+        url = 'https://{}/admin/recurring_application_charges.json'
+        headers = {
+                    'Content-Type': 'application/json',
+                    'X-Shopify-Access-Token': access_token,
+                    }
+        json =  {
+                "recurring_application_charge": {
+                "name": "Basic Plan",
+                "price": 3.99,
+                "return_url": "https://shrouded-hamlet-40239.herokuapp.com/activation",
+                "trial_days": 5,
+                "test": True
+                }
+            }
+        response = requests.post(url.format(domain_name),
+                                headers = headers,
+                                json = json)
+        if(response.json()['recurring_application_charge']['status'] == "pending"):
+            return redirect(response.json()['recurring_application_charge']['confirmation_url'])
+        else:
+            return redirect("core:index")
