@@ -7,7 +7,6 @@ class AuthAppShopUser(AbstractShopUser):
 class UserDatabase(models.Model):
     sno = models.AutoField(primary_key = True)
     domainName = models.CharField(max_length = 100,unique = True)
-    lastModified = models.DateTimeField()
     flag = models.IntegerField(default = -1)
     def __str__(self):
         return (str(self.domainName))
