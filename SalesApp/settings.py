@@ -22,6 +22,7 @@ TEMPLATE_DIRS = (
     os.path.join(BASE_DIR,  'static'),
 )
 
+handler404 = 'core.views.index'
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.0/howto/deployment/checklist/
 
