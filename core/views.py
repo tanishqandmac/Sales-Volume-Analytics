@@ -308,8 +308,7 @@ def billing(request, *args, **kwargs):
                 "recurring_application_charge": {
                 "name": "Basic Plan",
                 "price": 3.99,
-                "return_url": "https://shrouded-hamlet-40239.herokuapp.com/activation",
-                "trial_days": 5,
+                "return_url": "https://richilysr.herokuapp.com/activation",
                 "test": True
                 }
             }
