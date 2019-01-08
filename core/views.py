@@ -32,7 +32,7 @@ def orders_create(request):
                 sku = 0
             else:
                 sku = a['sku']
-            productsList = ProductsDatabase(sno = userObject,sku = sku, productName = str(a['name']),quantity = int(a['quantity']),createdAt = data['created_at'].split("T")[0])
+            productsList = ProductsDatabase(sno = userObject,sku = sku, productName = str(a['name']),quantity = int(a['quantity']),vendor = a['vendor'], createdAt = data['created_at'].split("T")[0])
             productsList.save()
         return HttpResponse('200')
     except BaseException as e:
@@ -211,6 +211,7 @@ def GrossSalesCal(userObject,response,customProductsList):
                                                         sku = SKU,
                                                         productName = str(items['node']['name']),
                                                         quantity = int(items['node']['quantity']),
+                                                        vendor = str(items['node']['vendor']),
                                                         createdAt = str(nodes['node']['createdAt']).split("T")[0])
                         productsList.save()
                     except BaseException as e:
@@ -238,6 +239,7 @@ def GrossSalesExtraCal(userObject,response):
                                                 sku = SKU,
                                                 productName = str(nodes['node']['name']),
                                                 quantity = int(nodes['node']['quantity']),
+                                                vendor = str(nodes['node']['vendor']),
                                                 createdAt = str(response['data']['order']['createdAt']).split("T")[0])
                 productsList.save()
             except BaseException as e:
@@ -250,7 +252,7 @@ def GrossSalesExtraCal(userObject,response):
 
 def ProductsDictMaker(userObject,productsList):
     plist = []
-    distinctProducts = productsList.values_list("sku","productName").distinct()
+    distinctProducts = productsList.values_list("sku","productName","vendor").distinct()
     for a in distinctProducts:
         quantity = productsList.filter(productName = a[1]).aggregate(Sum('quantity'))
         try:
@@ -265,9 +267,9 @@ def ProductsDictMaker(userObject,productsList):
             variant = "-"
         #date = str(distinctProductsFilter[0].createdAt).split()[0]
         if(a[0]!=0):
-            plist.append({'SKU':a[0],'Name':name.title(),'Variant':variant,'Quantity':quantity['quantity__sum']})
+            plist.append({'SKU':a[0],'Name':name.title(),'Variant':variant,'Quantity':quantity['quantity__sum'], 'Vendor':a[2]})
         else:
-            plist.append({'SKU':' - ','Name':name.title(),'Variant':variant,'Quantity':quantity['quantity__sum']})
+            plist.append({'SKU':' - ','Name':name.title(),'Variant':variant,'Quantity':quantity['quantity__sum'], 'Vendor':a[2]})
     #pListSorted = sorted(plist, key=itemgetter('Quantity'), reverse=True)
     return (plist)
 

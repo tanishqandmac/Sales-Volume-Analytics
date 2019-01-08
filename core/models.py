@@ -16,4 +16,5 @@ class ProductsDatabase(models.Model):
     sku = models.IntegerField(default = 0)
     productName = models.CharField(max_length = 300)
     quantity = models.IntegerField(default = 0)
+    vendor = models.CharField(max_length = 300, default = " - ")
     createdAt = models.DateTimeField()

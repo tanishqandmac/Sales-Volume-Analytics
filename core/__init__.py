@@ -75,6 +75,7 @@ GRAPHQL_ORDER_FETCH_QUERY = '''
             node {{
             sku
             name
+            vendor
             quantity
             }}
           }}
@@ -101,6 +102,7 @@ GRAPHQL_EXTRA_ORDERS_FETCH_ORDERS = '''
         node {{
           sku
           name
+          vendor
           quantity
         }}
       }}
