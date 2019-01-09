@@ -6,6 +6,7 @@ from shopify_webhook.decorators import webhook
 from shopify_auth.models import AbstractShopUser
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
+from django.core.mail import send_mail
 from rq import Connection, Queue
 from django.db.models import Sum
 from django.contrib import auth
@@ -324,3 +325,26 @@ def billing(request, *args, **kwargs):
                 return redirect("core:index")
         except:
             return render(request,"core/error.html",{})
+
+@csrf_exempt
+@webhook
+def shopdeletion(request):
+    return HttpResponse('200')
+
+@csrf_exempt
+@webhook
+def customerdeletion(request):
+    return HttpResponse('200')
+
+@csrf_exempt
+@webhook
+def datarequest(request):
+    Subject = "Data Request"
+    Message = str(request.webhook_data)
+    send_mail(
+    Subject,
+    Message,
+    'tanishqandmac@gmail.com',
+    ['richilycare@gmail.com'],
+    fail_silently=False,)
+    return HttpResponse('200')

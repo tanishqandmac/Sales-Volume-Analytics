@@ -11,6 +11,9 @@ urlpatterns = [
     url('sync', views.sync),
     url('activation', views.activation ,name = 'activation'),
     url('billing', views.billing ,name = 'billing'),
+    url('shopdeletion', views.shopdeletion ,name = 'shopdeletion'),
+    url('customerdeletion', views.customerdeletion ,name = 'customerdeletion'),
     url('webhooks', views.orders_create ,name = 'webhook'),
+    url('datarequest', views.datarequest ,name = 'datarequest'),
     url('uninstall', views.app_uninstalled ,name = 'uninstall'),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
