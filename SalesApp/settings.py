@@ -153,7 +153,7 @@ LOGIN_REDIRECT_URL = '/index'
 SHOPIFY_APP_NAME = 'Sales Volume Analytics'
 SHOPIFY_APP_API_KEY = os.environ.get('SHOPIFY_APP_API_KEY')
 SHOPIFY_APP_API_SECRET = os.environ.get('SHOPIFY_APP_API_SECRET')
-SHOPIFY_APP_API_SCOPE = ['read_products', 'read_orders', 'write_orders']
+SHOPIFY_APP_API_SCOPE = ['read_products', 'read_orders', 'write_orders', 'read_all_orders']
 SHOPIFY_APP_IS_EMBEDDED = False
 SHOPIFY_APP_DEV_MODE = False
 
