@@ -4,10 +4,11 @@ from django.db import models
 class AuthAppShopUser(AbstractShopUser):
     pass
 
-class UserDatabase(models.Model):
+class Users(models.Model):
     sno = models.AutoField(primary_key = True)
-    domainName = models.CharField(max_length = 100,unique = True)
+    domainName = models.CharField(max_length = 100, unique = True)
     flag = models.IntegerField(default = -1)
+    utc_offset = models.CharField(max_length = 10, default = '+0000')
     def __str__(self):
         return (str(self.domainName))
 

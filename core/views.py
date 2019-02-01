@@ -36,7 +36,7 @@ def orders_create(request):
                                             productName = str(a['name']),
                                             quantity = int(a['quantity']),
                                             vendor = a['vendor'],
-                                            createdAt = data['created_at'].split("T")[0])
+                                            createdAt = data['created_at'])
             productsList.save()
         return HttpResponse('200')
     except BaseException as e:
@@ -67,16 +67,13 @@ def index(request, *args, **kwargs):
                 date = request.GET.get('query', '')
                 sync = request.GET.get('sync', '')
                 if(date==''):
-                    productsList = ProductsDatabase.objects.filter(sno = userObject)
+                    dates = datePicker("today",userObject.utc_offset)
+                    productsList = ProductsDatabase.objects.filter(sno = userObject, createdAt__range=(dates[0], dates[1]))
                     if(len(productsList)==0 and sync!="True"):
                         return render(request, "core/sync.html", {})
                 else:
-                    dates = datePicker(date)
-                    if (len(dates) == 1):
-                        productsList = ProductsDatabase.objects.filter(sno = userObject,
-                                                                    createdAt=dates[0])
-                    elif (len(dates) == 2):
-                        productsList = ProductsDatabase.objects.filter(sno = userObject,
+                    dates = datePicker(date,userObject.utc_offset)
+                    productsList = ProductsDatabase.objects.filter(sno = userObject,
                                                                     createdAt__range=(dates[0], dates[1]))
                 pList = ProductsDictMaker(userObject,productsList)
                 Summary = summaryPicker(date)
@@ -127,6 +124,17 @@ def webhookCreation(domain_name,user_token):
         response2 = requests.post(GRAPHQL_URL_QUERY.format(domain_name),
                                 headers = headers,
                                 json = JSON_WEBHOOK_DESTROY_QUERY)
+    r = requests.post(GRAPHQL_URL_QUERY.format(domain_name),
+                      headers = graphql_headers,
+                      data = GRAPHQL_TIMEZONE_QUERY)
+    response = r.json()
+    try:
+        utc_offset = response['data']['shop']['timezoneOffset']
+        userObject = Users.objects.get(domainName = str(domain_name).split(".")[0])
+        userObject.utc_offset = utc_offset
+        userObject.save()
+    except Exception:
+        print(traceback.format_exc())
 
 @job
 def synchronisation(domain_name,user_token):
@@ -211,7 +219,7 @@ def GrossSalesCal(userObject,response,customProductsList):
                                                         productName = str(items['node']['name']),
                                                         quantity = int(items['node']['quantity']),
                                                         vendor = str(items['node']['vendor']),
-                                                        createdAt = str(nodes['node']['createdAt']).split("T")[0])
+                                                        createdAt = nodes['node']['createdAt'])
                         productsList.save()
                     except BaseException as e:
                         print (e)
@@ -239,7 +247,7 @@ def GrossSalesExtraCal(userObject,response):
                                                 productName = str(nodes['node']['name']),
                                                 quantity = int(nodes['node']['quantity']),
                                                 vendor = str(nodes['node']['vendor']),
-                                                createdAt = str(response['data']['order']['createdAt']).split("T")[0])
+                                                createdAt = response['data']['order']['createdAt'])
                 productsList.save()
             except BaseException as e:
                 print (e)
