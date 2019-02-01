@@ -118,17 +118,22 @@
     </div>
     <br>
   </div>
-  <footer class="page-footer font-small bg-dark text-white">
-    <div class="footer text-center"><img src="{% static 'core/img/footer.png' %}" width="250px" >
+  <!-- Footer -->
+  <footer class="page-footer bg bg-dark">
+    <div class="footer-copyright text-center py-3">
+      <span class="float-center">
+        <img src="{% static 'core/img/footer.png' %}" width="250px">
+      </span>
     </div>
   </footer>
+
 </body>
 <script type="text/javascript">
 $(document).ready(function() {
   var table = $('#example').DataTable();
   table
-    .order( [ 3, 'desc' ] )
-    .draw();
+  .order( [ 3, 'desc' ] )
+  .draw();
 
 } );
 </script>
