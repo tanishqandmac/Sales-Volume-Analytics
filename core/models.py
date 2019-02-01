@@ -4,7 +4,7 @@ from django.db import models
 class AuthAppShopUser(AbstractShopUser):
     pass
 
-class Users(models.Model):
+class UserDatabase(models.Model):
     sno = models.AutoField(primary_key = True)
     domainName = models.CharField(max_length = 100, unique = True)
     flag = models.IntegerField(default = -1)
