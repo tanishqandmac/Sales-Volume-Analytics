@@ -1,4 +1,4 @@
-from . import HEADERS_QUERY, JSON_WEBHOOK_CREATE_QUERY, GRAPHQL_URL_QUERY, GRAPHQL_WEBHOOK_CHECK_QUERY, GRAPHQL_ORDER_FETCH_QUERY, CALLBACKURL, GRAPHQL_HEADERS_QUERY, JSON_WEBHOOK_DESTROY_QUERY, GRAPHQL_EXTRA_ORDERS_FETCH_ORDERS
+from .webhooks import *
 from django.views.decorators.csrf import csrf_exempt
 from shopify_auth.decorators import login_required
 from .models import UserDatabase,ProductsDatabase
@@ -6,7 +6,6 @@ from shopify_webhook.decorators import webhook
 from shopify_auth.models import AbstractShopUser
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
-from django.core.mail import send_mail
 from rq import Connection, Queue
 from django.db.models import Sum
 from django.contrib import auth
@@ -27,13 +26,17 @@ def orders_create(request):
     try:
         userObject = UserDatabase.objects.get(domainName = str((request.webhook_domain)).split(".")[0])
         data = request.webhook_data
-        print (data['line_items'])
         for a in data['line_items']:
             if (a['sku']==""):
                 sku = 0
             else:
                 sku = a['sku']
-            productsList = ProductsDatabase(sno = userObject,sku = sku, productName = str(a['name']),quantity = int(a['quantity']),vendor = a['vendor'], createdAt = data['created_at'].split("T")[0])
+            productsList = ProductsDatabase(sno = userObject,
+                                            sku = sku,
+                                            productName = str(a['name']),
+                                            quantity = int(a['quantity']),
+                                            vendor = a['vendor'],
+                                            createdAt = data['created_at'].split("T")[0])
             productsList.save()
         return HttpResponse('200')
     except BaseException as e:
@@ -58,29 +61,29 @@ def syncpage(request, *args, **kwargs):
 def index(request, *args, **kwargs):
     with request.user.session:
         try:
-            print (request.user)
             obj,flag = UserDatabase.objects.get_or_create(domainName=str(request.user).split(".")[0])
             if (obj.flag == 1):
                 userObject = UserDatabase.objects.get(domainName = str((request.user)).split(".")[0])
                 date = request.GET.get('query', '')
+                sync = request.GET.get('sync', '')
                 if(date==''):
                     productsList = ProductsDatabase.objects.filter(sno = userObject)
-                    print (len(productsList))
-                    if(len(productsList)==0):
+                    if(len(productsList)==0 and sync!="True"):
                         return render(request, "core/sync.html", {})
                 else:
                     dates = datePicker(date)
                     if (len(dates) == 1):
-                        print (dates)
                         productsList = ProductsDatabase.objects.filter(sno = userObject,
                                                                     createdAt=dates[0])
-                        print (len(productsList))
                     elif (len(dates) == 2):
                         productsList = ProductsDatabase.objects.filter(sno = userObject,
                                                                     createdAt__range=(dates[0], dates[1]))
                 pList = ProductsDictMaker(userObject,productsList)
                 Summary = summaryPicker(date)
-                return render(request, "core/report.html", {'Products': pList, "Summary":Summary})
+                if (sync == "True"):
+                    return render(request, "core/report.html", {'Products': pList, "Summary":Summary,"Sync":"True"})
+                else:
+                    return render(request, "core/report.html", {'Products': pList, "Summary":Summary})
             else:
                 return redirect("core:billing")
         except Exception:
@@ -98,8 +101,7 @@ def sync(request, *args, **kwargs):
         except Exception:
             print(traceback.format_exc())
             return render(request,"core/error.html",{})
-    time.sleep(3)
-    return redirect('core:index')
+    return  redirect("index/?sync=True")
 
 @job
 def webhookCreation(domain_name,user_token):
@@ -146,18 +148,17 @@ def synchronisation(domain_name,user_token):
     userObject = UserDatabase.objects.filter(domainName = str(domain_name).split(".")[0]).delete()
     userObject = UserDatabase(domainName = str(domain_name).split(".")[0],flag = 1)
     userObject.save()
-
     #Fetching Orders and Storing them via Graphql
     response = requests.post(GRAPHQL_URL_QUERY.format(domain_name),
                             headers=graphql_headers,
-                            data=GRAPHQL_ORDER_FETCH_QUERY.format(""))
+                            data=GRAPHQL_PRODUCT_FETCH_QUERY.format(""))
 
     responseJSON = response.json()
     GrossSales = GrossSalesCal(userObject,responseJSON,customProducts)
     k = 2
     while(GrossSales[0]!=0):
         if(GrossSales[0] == 1):
-            dataH = GRAPHQL_ORDER_FETCH_QUERY.format(", after:" + "\"" + GrossSales[1] + "\"")
+            dataH = GRAPHQL_PRODUCT_FETCH_QUERY.format(", after:" + "\"" + GrossSales[1] + "\"")
             response = requests.post(GRAPHQL_URL_QUERY.format(domain_name),
                                     headers = graphql_headers,
                                     data = dataH)
@@ -182,19 +183,16 @@ def synchronisation(domain_name,user_token):
 
     print ("Done")
     for items in GrossSales[2]:
-        print (items)
         response = requests.post(GRAPHQL_URL_QUERY.format(domain_name),
                                 headers = graphql_headers,
-                                data = GRAPHQL_EXTRA_ORDERS_FETCH_ORDERS.format(items))
+                                data = GRAPHQL_EXTRA_PRODUCTS_FETCH_QUERY.format(items))
         responseJSON = response.json()
-        print (responseJSON)
         response = GrossSalesExtraCal(userObject,responseJSON)
-        print (response)
         while (response == -1):
             time.sleep(5)
             response = requests.post(GRAPHQL_URL_QUERY.format(domain_name),
                                     headers = graphql_headers,
-                                    data = GRAPHQL_EXTRA_ORDERS_FETCH_ORDERS.format(items))
+                                    data = GRAPHQL_EXTRA_PRODUCTS_FETCH_QUERY.format(items))
             responseJSON = response.json()
             response = GrossSalesExtraCal(userObject,responseJSON)
 
@@ -311,6 +309,7 @@ def billing(request, *args, **kwargs):
                 "recurring_application_charge": {
                 "name": "Basic Plan",
                 "price": 3.99,
+                #"return_url": "https://017c6112.ngrok.io/activation",
                 "return_url": "https://richilysr.herokuapp.com/activation",
                 "test": True
                 }

@@ -1,5 +1,4 @@
 {% extends 'core/base.html' %}
-{% load staticfiles%}
 {% block content %}
     <br>
 <div class="media border border-outline-info shadow-sm" style="padding:15px;">
@@ -17,16 +16,5 @@
     <button class="btn btn-info btn-lg text-white center" id='btnsubmit'>Sync</button>
   </div>
 </div>
-<script type="text/javascript">
-$(function()
-{
-  $('#btnsubmit').on('click',function()
-  {
-    $(this).text('Fetching Orders ...')
-    .attr('disabled','disabled');
-    location.href="/sync"
-  });
 
-});
-</script>
 {% endblock %}

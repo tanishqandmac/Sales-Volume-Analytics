@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sales Volume Report</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
+  <script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.datatables.net/1.10.19/js/dataTables.bootstrap4.min.js"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+  <style>
+  .card{
+    padding-bottom: 10px
+  }
+  .container {
+    display: flex;
+  }
+</style>
+</head>
+<body>
+  <div class="jumbotron">
+    <h1 class="text-dark text-center"><strong style="font-weight:900">Sales </strong> <strong style="font-weight:100; color:deepskyblue;">Report</strong></h1>
+    <img src="{% static 'core/img/richily1.png' %}" class="float-right" width="150px">
+  </div>
+  <div class = "container-fluid">
+{% block content %}
+{% endblock %}
+      <footer class="footer sticky-bottom bg bg-info text-white text-center" style="padding:10px;">
+            Copyright@ 2018 <strong>Richily.com</strong>
+      </footer>
+</body>
+<script type="text/javascript">
+$(document).ready(function() {
+  var table = $('#example').DataTable();
+  table
+  .order( [ 3, 'desc' ] )
+  .draw();
+
+} );
+</script>
+<script type='text/javascript'>
+window.onload=function(){
+  (function() {
+    var visited = localStorage.getItem('visited');
+    if (!visited) {
+      document.getElementById("popupp").style.visibility = "visible";
+      localStorage.setItem('visited', true);
+    }
+    else {
+      var elem = document.getElementById('popupp');
+      elem.parentNode.removeChild(elem);
+    }
+  })();
+}
+
+</script>
+<script type="text/javascript">
+$(function() {
+  $('input[name="datefilter"]').daterangepicker({
+    autoUpdateInput: false,
+    locale: {
+      cancelLabel: 'Clear'
+    }
+  });
+  $('input[name="datefilter"]').on('apply.daterangepicker', function(ev, picker) {
+    $(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
+  });
+  $('input[name="datefilter"]').on('cancel.daterangepicker', function(ev, picker) {
+    $(this).val('');
+  });
+});
+function customDate() {
+  var pesos = document.getElementById("lol");
+  var dates = pesos.value.replace(" - ","-");
+  var query = "/?query=";
+  var final = query.concat(dates);
+  console.log(final);
+  var url  = '/index';
+  var final1 = url.concat(final);
+  window.location.href = final1;
+}
+</script>
+<script type="text/javascript">
+$(function()
+{
+  $('#btnsubmit').on('click',function()
+  {
+    $(this).text('Fetching Orders ...')
+    .attr('disabled','disabled');
+    location.href="/sync"
+  });
+
+});
+</script>
+</html>
