@@ -1,4 +1,4 @@
-CALLBACKURL = "https://richilysr.herokuapp.com/webhooks"
+CALLBACKURL = "https://richilysr.herokuapp.com/"
 GRAPHQL_URL_QUERY = 'https://{}/admin/api/graphql.json'
 GRAPHQL_HEADERS_QUERY = '''{{
                 'Content-Type': 'application/graphql',
