@@ -312,6 +312,7 @@ def billing(request, *args, **kwargs):
                 "name": "Basic Plan",
                 "price": 3.99,
                 "return_url": "https://richilysr.herokuapp.com/activation",
+                "test": True
                 }
             }
         response = requests.post(url.format(domain_name),
