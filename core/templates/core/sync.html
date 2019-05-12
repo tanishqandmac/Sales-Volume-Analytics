@@ -1,7 +1,16 @@
 {% extends 'core/base.html' %}
 {% load staticfiles%}
 {% block content %}
+
+
     <br>
+    <h2><span>Installation </span><strong> Steps</strong></h2><hr>
+    <li> Click the "Sync" button below to fetch all the past orders.</li>
+    <li> Once clicked you'll be directed to the main page of the app which will display all the data.</li>
+    <li><strong>P.S - Your main page will reflect all the data within 5-10 mins after fetching all the past data</strong></li>
+
+    <a href = "{% url 'core:syncpage' %}"><button type="button" class="btn btn-success">Resync Orders</button></a>
+<br>
 <div class="media border border-outline-info shadow-sm" style="padding:15px;">
   <img class="align-self-center mr-3" src="{% static 'core/img/sync.png' %}" alt="Generic placeholder image"  width="100px" height="100px">
   <div class="media-body">
