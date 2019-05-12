@@ -149,7 +149,7 @@ LOGIN_REDIRECT_URL = '/index'
 # Note that sensitive credentials SHOPIFY_APP_API_KEY and SHOPIFY_APP_API_SECRET are read from environment variables,
 # as is best practice. These environment variables are in turn read from a .env file in the project directory.
 # See https://github.com/theskumar/python-dotenv for more.
-SHOPIFY_APP_NAME = 'Sales Volume Analytics'
+SHOPIFY_APP_NAME = 'Sales Volume Tree'
 SHOPIFY_APP_API_KEY = os.environ.get('SHOPIFY_APP_API_KEY')
 SHOPIFY_APP_API_SECRET = os.environ.get('SHOPIFY_APP_API_SECRET')
 SHOPIFY_APP_API_SCOPE = ['read_products', 'read_orders', 'write_orders', 'read_all_orders']

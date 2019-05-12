@@ -277,7 +277,6 @@ def ProductsDictMaker(userObject,productsList):
             plist.append({'SKU':a[0],'Name':name.title(),'Variant':variant,'Quantity':quantity['quantity__sum'], 'Vendor':a[2]})
         else:
             plist.append({'SKU':' - ','Name':name.title(),'Variant':variant,'Quantity':quantity['quantity__sum'], 'Vendor':a[2]})
-    #pListSorted = sorted(plist, key=itemgetter('Quantity'), reverse=True)
     return (plist)
 
 @login_required
