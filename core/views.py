@@ -324,9 +324,9 @@ def billing(request, *args, **kwargs):
                     'X-Shopify-Access-Token': access_token,
                     }
         json =  {
-                "recurring_application_charge": {
+                "application_charge": {
                 "name": "Basic Plan",
-                "price": 3.99,
+                "price": 4.99,
                 "return_url": "https://richilysr.herokuapp.com/activation",
                 "test": True
                 }
