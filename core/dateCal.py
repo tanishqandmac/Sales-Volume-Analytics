@@ -28,6 +28,8 @@ def datePicker(date, offset):
         date = thirdQuarter(offset)
     elif (date=="4thquarter"):
         date = fourthQuarter(offset)
+    elif (date==""):
+        date = ''
     else:
         try:
             customdate = date.split("-")
