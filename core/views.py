@@ -71,12 +71,19 @@ def index(request, *args, **kwargs):
                     productsList = ProductsDatabase.objects.filter(sno = userObject, createdAt__range=(dates[0], dates[1]))
                     if(len(productsList)==0 and sync!="True"):
                         return render(request, "core/sync.html", {})
+                elif(date=='all'):
+                    productsList = ProductsDatabase.objects.filter(sno = userObject)
+                    if(len(productsList)==0 and sync!="True"):
+                        return render(request, "core/sync.html", {})
                 else:
                     dates = datePicker(date,userObject.utc_offset)
                     productsList = ProductsDatabase.objects.filter(sno = userObject,
                                                                     createdAt__range=(dates[0], dates[1]))
                 pList = ProductsDictMaker(userObject,productsList)
-                Summary = summaryPicker(date)
+                if(date!='all'):
+                    Summary = summaryPicker(date)
+                else:
+                    Summary = "All Time"
                 if (sync == "True"):
                     return render(request, "core/report.html", {'Products': pList, "Summary":Summary,"Sync":"True"})
                 else:
@@ -220,10 +227,6 @@ def GrossSalesCal(userObject,response,customProductsList):
                                                         quantity = int(items['node']['quantity']),
                                                         vendor = str(items['node']['vendor']),
                                                         createdAt = nodes['node']['createdAt'])
-                        print (str(items['node']['name']))
-                        print (int(items['node']['quantity']))
-                        print (str(items['node']['vendor']))
-                        print (nodes['node']['createdAt'])
                         productsList.save()
                     except BaseException as e:
                         print (e)
