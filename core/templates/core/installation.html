@@ -1,7 +1,7 @@
 {% extends 'core/base.html' %}
 {% block content %}
-<h2><span>Installation </span><strong> Guide</strong> </h2><hr>
-<h5><strong>You can install this app using any one of the two methods - </strong></h5>
+<h2><span>Installation </span><strong> Guide</strong> <span class="align-right"><a href = "{% url 'core:index' %}"><button type="button" class="btn btn-info">Go Back</button></a></span></h2><hr>
+<h5><strong>You can install this app using any of the methods mentioned below- </strong></h5>
 <li> Click the Sync button which is displayed when you open the app for the first time.</li>
 <li> Click this button to resync all the orders (this may take a while to reflect in the sales table).</li>
 <a href = "{% url 'core:syncpage' %}"><button type="button" class="btn btn-success">Resync Orders</button></a>
@@ -11,4 +11,5 @@
 <li> Close this window and Clear your browser's cache</li>
 <li> Reinstall the App</li>
 <li>If above method doesn't work, please contact our support executive - <a href="mailto:richilycare@gmail.com" target="_top">richilycare@gmail.com</a></li>
+<br><br><br><br><br><br>
 {% endblock %}
