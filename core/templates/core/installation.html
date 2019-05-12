@@ -1,10 +1,14 @@
 {% extends 'core/base.html' %}
 {% block content %}
-<h2><span>Installation &amp; Troubleshooting</span><strong> Guide</strong> </h2><hr>
-<h5>Troubleshooting Steps</h5>
-<li>Clear your browser cache and refresh the browser.</li>
-<li>Close this window and Reinstall the App after 5-10 minutes.</li>
-<li>If above method doesn't work, please contact our support executive - <a href="mailto:tanishqandmac@gmail.com" target="_top">tanishqandmac@gmail.com</a></li>
-<br><br><br><br>
-</div>
+<h2><span>Installation </span><strong> Guide</strong> </h2><hr>
+<h5><strong>You can install this app using any one of the two methods - </strong></h5>
+<li> Click the Sync button which is displayed when you open the app for the first time.</li>
+<li> Click this button to resync all the orders (this may take a while to reflect in the sales table).</li>
+<a href = "{% url 'core:syncpage' %}"><button type="button" class="btn btn-success">Resync Orders</button></a>
+<br><br><hr><br><br>
+<h2><span>Troubleshooting </span><strong> Guide</strong> </h2><hr>
+<h5>If you are encountering any issues with the app, Perform the following steps -</h5>
+<li> Close this window and Clear your browser's cache</li>
+<li> Reinstall the App</li>
+<li>If above method doesn't work, please contact our support executive - <a href="mailto:richilycare@gmail.com" target="_top">richilycare@gmail.com</a></li>
 {% endblock %}
