@@ -128,7 +128,6 @@ def webhookCreation(domain_name,user_token):
                       headers = graphql_headers,
                       data = GRAPHQL_TIMEZONE_QUERY)
     response = r.json()
-    print (response)
     try:
         utc_offset = response['data']['shop']['timezoneOffset']
         userObject = UserDatabase.objects.get(domainName = str(domain_name).split(".")[0])
@@ -221,6 +220,10 @@ def GrossSalesCal(userObject,response,customProductsList):
                                                         quantity = int(items['node']['quantity']),
                                                         vendor = str(items['node']['vendor']),
                                                         createdAt = nodes['node']['createdAt'])
+                        print (str(items['node']['name']))
+                        print (int(items['node']['quantity']))
+                        print (str(items['node']['vendor']))
+                        print (nodes['node']['createdAt']))
                         productsList.save()
                     except BaseException as e:
                         print (e)
