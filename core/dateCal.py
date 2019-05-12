@@ -65,8 +65,8 @@ def summaryPicker(date):
         summary = "4th Quarter's"
     else:
         custom = date.split("-")
-        #summary = "["+str(custom[0]) + " - " + str(custom[1]) + "] Custom"
-        summary = "Custom"
+        summary = "["+str(custom[0]) + " - " + str(custom[1]) + "] Custom"
+        # summary = "Custom"
     return summary
 
 def thisDay(offset):
