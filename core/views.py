@@ -68,9 +68,6 @@ def index(request, *args, **kwargs):
                 date = request.GET.get('query', '')
                 sync = request.GET.get('sync', '')
                 if(date==''):
-                    dates = datePicker("today",userObject.utc_offset)
-                    productsList = ProductsDatabase.objects.filter(sno = userObject, createdAt__range=(dates[0], dates[1]))
-                elif(date=='all'):
                     productsList = ProductsDatabase.objects.filter(sno = userObject)
                     if(len(productsList)==0 and sync!="True"):
                         return render(request, "core/sync.html", {})
@@ -79,7 +76,7 @@ def index(request, *args, **kwargs):
                     productsList = ProductsDatabase.objects.filter(sno = userObject,
                                                                     createdAt__range=(dates[0], dates[1]))
                 pList = ProductsDictMaker(userObject,productsList)
-                if(date!='all'):
+                if(date!=''):
                     Summary = summaryPicker(date)
                 else:
                     Summary = "All Time"
