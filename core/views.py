@@ -128,6 +128,7 @@ def webhookCreation(domain_name,user_token):
                       headers = graphql_headers,
                       data = GRAPHQL_TIMEZONE_QUERY)
     response = r.json()
+    print (response)
     try:
         utc_offset = response['data']['shop']['timezoneOffset']
         userObject = UserDatabase.objects.get(domainName = str(domain_name).split(".")[0])
@@ -164,6 +165,7 @@ def synchronisation(domain_name,user_token):
     responseJSON = response.json()
     GrossSales = GrossSalesCal(userObject,responseJSON,customProducts)
     k = 2
+    print (responseJSON)
     while(GrossSales[0]!=0):
         if(GrossSales[0] == 1):
             dataH = GRAPHQL_PRODUCT_FETCH_QUERY.format(", after:" + "\"" + GrossSales[1] + "\"")
@@ -175,7 +177,6 @@ def synchronisation(domain_name,user_token):
             GrossSales = GrossSalesCal(userObject,
                                        responseJSON,
                                        GrossSales[2])
-                ##GrossSales = GrossSalesCal(userObject,responseJSON,GrossSales[2])
             k = 2
             time.sleep(1)
             print ("1 - " + str(k))
@@ -272,7 +273,6 @@ def ProductsDictMaker(userObject,productsList):
         except:
             name = a[1]
             variant = "-"
-        #date = str(distinctProductsFilter[0].createdAt).split()[0]
         if(a[0]!=0):
             plist.append({'SKU':a[0],'Name':name.title(),'Variant':variant,'Quantity':quantity['quantity__sum'], 'Vendor':a[2]})
         else:
@@ -316,7 +316,6 @@ def billing(request, *args, **kwargs):
                 "recurring_application_charge": {
                 "name": "Basic Plan",
                 "price": 3.99,
-                #"return_url": "https://017c6112.ngrok.io/activation",
                 "return_url": "https://richilysr.herokuapp.com/activation",
                 "test": True
                 }
