@@ -223,7 +223,7 @@ def GrossSalesCal(userObject,response,customProductsList):
                         print (str(items['node']['name']))
                         print (int(items['node']['quantity']))
                         print (str(items['node']['vendor']))
-                        print (nodes['node']['createdAt']))
+                        print (nodes['node']['createdAt'])
                         productsList.save()
                     except BaseException as e:
                         print (e)
