@@ -63,14 +63,13 @@ def index(request, *args, **kwargs):
         try:
             obj,flag = UserDatabase.objects.get_or_create(domainName=str(request.user).split(".")[0])
             if (obj.flag == 1):
+                print ("User Logged In!")
                 userObject = UserDatabase.objects.get(domainName = str((request.user)).split(".")[0])
                 date = request.GET.get('query', '')
                 sync = request.GET.get('sync', '')
                 if(date==''):
                     dates = datePicker("today",userObject.utc_offset)
                     productsList = ProductsDatabase.objects.filter(sno = userObject, createdAt__range=(dates[0], dates[1]))
-                    if(len(productsList)==0 and sync!="True"):
-                        return render(request, "core/sync.html", {})
                 elif(date=='all'):
                     productsList = ProductsDatabase.objects.filter(sno = userObject)
                     if(len(productsList)==0 and sync!="True"):
@@ -89,8 +88,10 @@ def index(request, *args, **kwargs):
                 else:
                     return render(request, "core/report.html", {'Products': pList, "Summary":Summary})
             else:
+                print ("Index Billing")
                 return redirect("core:billing")
         except Exception:
+            print ("Index Exception")
             print(traceback.format_exc())
             return render(request, "core/sync.html", {})
 
@@ -171,7 +172,6 @@ def synchronisation(domain_name,user_token):
     responseJSON = response.json()
     GrossSales = GrossSalesCal(userObject,responseJSON,customProducts)
     k = 2
-    print (responseJSON)
     while(GrossSales[0]!=0):
         if(GrossSales[0] == 1):
             dataH = GRAPHQL_PRODUCT_FETCH_QUERY.format(", after:" + "\"" + GrossSales[1] + "\"")
