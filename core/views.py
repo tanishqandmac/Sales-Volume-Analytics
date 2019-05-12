@@ -58,6 +58,14 @@ def syncpage(request, *args, **kwargs):
     return render(request,"core/sync.html",{})
 
 @login_required
+def faq(request, *args, **kwargs):
+    return render(request,"core/faq.html",{})
+
+@login_required
+def installation(request, *args, **kwargs):
+    return render(request,"core/installation.html",{})
+
+@login_required
 def index(request, *args, **kwargs):
     with request.user.session:
         try:

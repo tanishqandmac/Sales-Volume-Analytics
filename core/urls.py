@@ -8,6 +8,8 @@ urlpatterns = [
     url('index', views.index ,name = 'index'),
     url('index/(?P<query>\s+)/$', views.index),
     url('syncpage', views.sync, name = 'syncpage'),
+    url('faq', views.faq, name = 'faq'),
+    url('installation', views.installation, name = 'installation'),
     url('sync', views.sync),
     url('activation', views.activation ,name = 'activation'),
     url('billing', views.billing ,name = 'billing'),
