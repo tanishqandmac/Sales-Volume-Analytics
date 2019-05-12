@@ -130,7 +130,7 @@ def webhookCreation(domain_name,user_token):
     response = r.json()
     try:
         utc_offset = response['data']['shop']['timezoneOffset']
-        userObject = Users.objects.get(domainName = str(domain_name).split(".")[0])
+        userObject = UserDatabase.objects.get(domainName = str(domain_name).split(".")[0])
         userObject.utc_offset = utc_offset
         userObject.save()
     except Exception:
