@@ -294,7 +294,7 @@ def ProductsDictMaker(userObject,productsList):
 def activation(request, *args, **kwargs):
     with request.user.session:
         charge = request.GET.get('charge_id', '')
-        url = 'https://{domain}/admin/recurring_application_charges/{charge}/activate.json'
+        url = 'https://{domain}/admin/application_charges/{charge}/activate.json'
         headers = {
                     'Content-Type': 'application/json',
                     'X-Shopify-Access-Token': request.user.token,
@@ -303,7 +303,7 @@ def activation(request, *args, **kwargs):
                                 charge = charge),
                                 headers = headers)
         try:
-            if(response.json()['recurring_application_charge']['status'] == "active"):
+            if(response.json()['application_charge']['status'] == "active"):
                 obj = UserDatabase.objects.get(domainName = str(request.user).split(".")[0])
                 obj.flag = 1
                 obj.save()
