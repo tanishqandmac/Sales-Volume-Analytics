@@ -294,7 +294,7 @@ def ProductsDictMaker(userObject,productsList):
 def activation(request, *args, **kwargs):
     with request.user.session:
         charge = request.GET.get('charge_id', '')
-        url = 'https://{domain}/admin/application_charges/{charge}/activate.json'
+        url = 'https://{domain}/admin/api/2019-04/application_charges/{charge}/activate.json'
         headers = {
                     'Content-Type': 'application/json',
                     'X-Shopify-Access-Token': request.user.token,
@@ -318,7 +318,7 @@ def billing(request, *args, **kwargs):
     with request.user.session:
         domain_name = request.user
         access_token = request.user.token
-        url = 'https://{}/admin/recurring_application_charges.json'
+        url = 'https://{}/admin/api/2019-04/application_charges.json'
         headers = {
                     'Content-Type': 'application/json',
                     'X-Shopify-Access-Token': access_token,
@@ -335,8 +335,8 @@ def billing(request, *args, **kwargs):
                                 headers = headers,
                                 json = json)
         try:
-            if(response.json()['recurring_application_charge']['status'] == "pending"):
-                return redirect(response.json()['recurring_application_charge']['confirmation_url'])
+            if(response.json()['application_charge']['status'] == "pending"):
+                return redirect(response.json()['application_charge']['confirmation_url'])
             else:
                 return redirect("core:index")
         except:
