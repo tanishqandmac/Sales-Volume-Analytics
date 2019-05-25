@@ -48,7 +48,7 @@ def app_uninstalled(request):
     try:
         data = request.webhook_data
         UserDatabase.objects.filter(domainName = str(data['domain']).split(".")[0]).delete()
-        print (str(data['domain']).split(".")[0]))
+        print (str(data['domain']).split(".")[0])
         return HttpResponse('200')
     except Exception:
         print(traceback.format_exc())
