@@ -48,6 +48,7 @@ def app_uninstalled(request):
     try:
         data = request.webhook_data
         UserDatabase.objects.filter(domainName = str(data['domain']).split(".")[0]).delete()
+        print (str(data['domain']).split(".")[0]))
         return HttpResponse('200')
     except Exception:
         print(traceback.format_exc())
@@ -70,6 +71,8 @@ def index(request, *args, **kwargs):
     with request.user.session:
         try:
             obj,flag = UserDatabase.objects.get_or_create(domainName=str(request.user).split(".")[0])
+            print (obj)
+            print (flag)
             if (obj.flag == 1):
                 print ("User Logged In!")
                 userObject = UserDatabase.objects.get(domainName = str((request.user)).split(".")[0])
