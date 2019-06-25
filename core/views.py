@@ -30,7 +30,7 @@ def orders_create(request):
         )
         data = request.webhook_data
         for a in data["line_items"]:
-            if a["sku"] == "" or type(a[0]) == str:
+            if a["sku"] == "" or type(a["sku"]) == str:
                 sku = 0
             else:
                 sku = a["sku"]
@@ -277,7 +277,7 @@ def GrossSalesCal(userObject, response, customProductsList):
                         if (
                             items["node"]["sku"] == ""
                             or items["node"]["sku"] == None
-                            or type(a[0]) == str
+                            or type(items["node"]["sku"]) == str
                         ):
                             SKU = 0
                         else:
@@ -316,7 +316,7 @@ def GrossSalesExtraCal(userObject, response):
                 if (
                     nodes["node"]["sku"] == ""
                     or nodes["node"]["sku"] == None
-                    or type(a[0]) == str
+                    or type(nodes["node"]["sku"]) == str
                 ):
                     SKU = 0
                 else:
