@@ -8,7 +8,7 @@ chardet==3.0.4
 Click==7.0
 codegen==1.0
 croniter==0.3.26
-cryptography==2.4.2
+cryptography==3.2
 dj-database-url==0.5.0
 Django==2.0
 django-crispy-forms==1.7.2
